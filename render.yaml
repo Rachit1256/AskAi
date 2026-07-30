@@ -1,0 +1,38 @@
+# Render blueprint. Commit this at the repository root and Render will pick it up.
+#
+# Two things here are not optional for this architecture:
+#   * a persistent disk -- DuckDB is a file, and an ephemeral filesystem throws
+#     away every ingested workbook on each redeploy;
+#   * numInstances: 1 -- DuckDB allows one writing process per database file, so
+#     a second instance cannot open the warehouse.
+
+services:
+  - type: web
+    name: satmet-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter            # free plan has no persistent disk; this needs one
+    region: singapore        # closest Render region to India
+    numInstances: 1
+    healthCheckPath: /health
+    disk:
+      name: satmet-data
+      mountPath: /data
+      sizeGB: 10
+    envVars:
+      - key: IMDQ_ENV
+        value: production
+      - key: IMDQ_LOG_LEVEL
+        value: INFO
+      - key: IMDQ_DATA_DIR
+        value: /data
+      - key: IMDQ_WAREHOUSE_PATH
+        value: /data/warehouse.duckdb
+      - key: IMDQ_MAX_UPLOAD_MB
+        value: "256"
+      # Must be a JSON array of exact origins. The config rejects "*" at load,
+      # so a wildcard here stops the service from starting rather than shipping
+      # an open CORS policy.
+      - key: IMDQ_CORS_ORIGINS
+        sync: false

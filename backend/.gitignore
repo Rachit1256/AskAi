@@ -1,0 +1,10 @@
+var/
+.venv/
+__pycache__/
+*.pyc
+.env
+*.duckdb
+*.duckdb.wal
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

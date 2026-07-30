@@ -1,0 +1,11 @@
+var/
+.venv/
+venv/
+__pycache__/
+*.pyc
+tests/
+run_dev.py
+run_tests.py
+.env
+.env.*
+README.md
