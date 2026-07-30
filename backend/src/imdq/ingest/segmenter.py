@@ -35,6 +35,7 @@ TOTALS_TOKENS = ("total", "grand total", "subtotal", "sum", "overall")
 
 # ---------------------------------------------------------------- banners
 
+
 def _banner_rows(grid: Grid) -> np.ndarray:
     """Text-only rows that are a single cell or a wide merge: titles and notes.
 
@@ -54,6 +55,7 @@ def _banner_rows(grid: Grid) -> np.ndarray:
 
 
 # ---------------------------------------------------------------- XY-cut
+
 
 def _interior_runs(mask: np.ndarray, min_len: int) -> list[tuple[int, int]]:
     runs: list[tuple[int, int]] = []
@@ -105,7 +107,7 @@ def _xy_cut(
         return [trimmed]
 
     out: list[Block] = []
-    cut_rows = widest_row >= widest_col          # ties favour rows
+    cut_rows = widest_row >= widest_col  # ties favour rows
     gaps = row_gaps if cut_rows else col_gaps
     extent = trimmed.height if cut_rows else trimmed.width
     bounds = [(s, s + n) for s, n in gaps] + [(extent, extent)]
@@ -165,14 +167,17 @@ def _components(occ: np.ndarray, block: Block, bridge: int = 1) -> list[Block]:
                 xs = [c[1] for c in cells]
                 found.append(
                     Block(
-                        block.r0 + min(ys), block.r0 + max(ys),
-                        block.c0 + min(xs), block.c0 + max(xs),
+                        block.r0 + min(ys),
+                        block.r0 + max(ys),
+                        block.c0 + min(xs),
+                        block.c0 + max(xs),
                     )
                 )
     return found or [block]
 
 
 # ---------------------------------------------------------------- headers
+
 
 def _modal_body_signature(grid: Grid, r_from: int, r_to: int, c0: int, c1: int) -> np.ndarray:
     rows = range(r_from, min(r_to, r_from + 8) + 1)
@@ -197,19 +202,17 @@ def _header_score(grid: Grid, row: int, body_sig: np.ndarray, c0: int, c1: int) 
         if body_sig[k] != EMPTY and row_types[k] != EMPTY and row_types[k] != body_sig[k]
     )
     divergence = diverging / width
-    styled = 1.0 if (grid.bold[row, c0 : c1 + 1].any() or grid.filled[row,
-        c0 : c1 + 1].any()) else 0.0
-    labels = [str(grid.values[row, c]).strip() for c in range(c0, c1 + 1) if grid.dtype[row,
-        c] != EMPTY]
+    styled = (
+        1.0 if (grid.bold[row, c0 : c1 + 1].any() or grid.filled[row, c0 : c1 + 1].any()) else 0.0
+    )
+    labels = [
+        str(grid.values[row, c]).strip() for c in range(c0, c1 + 1) if grid.dtype[row, c] != EMPTY
+    ]
     uniqueness = len(set(labels)) / max(1, len(labels))
     density = occupied / width
 
     return (
-        0.34 * text_ratio
-        + 0.28 * divergence
-        + 0.16 * styled
-        + 0.10 * uniqueness
-        + 0.12 * density
+        0.34 * text_ratio + 0.28 * divergence + 0.16 * styled + 0.10 * uniqueness + 0.12 * density
     )
 
 
@@ -226,8 +229,10 @@ def _detect_header(grid: Grid, block: Block) -> tuple[list[int], float]:
     rows = [best_row]
     if best_row + 1 < block.r1:
         signature = _modal_body_signature(grid, best_row + 2, block.r1, block.c0, block.c1)
-        if _header_score(grid, best_row + 1, signature, block.c0,
-            block.c1) > HIERARCHICAL_HEADER_ACCEPT:
+        if (
+            _header_score(grid, best_row + 1, signature, block.c0, block.c1)
+            > HIERARCHICAL_HEADER_ACCEPT
+        ):
             rows.append(best_row + 1)
     return rows, best_score
 
@@ -236,9 +241,7 @@ def _header_labels(grid: Grid, block: Block) -> list[str]:
     labels: list[str] = []
     for c in range(block.c0, block.c1 + 1):
         parts = [
-            str(grid.values[r, c]).strip()
-            for r in block.header_rows
-            if grid.dtype[r, c] != EMPTY
+            str(grid.values[r, c]).strip() for r in block.header_rows if grid.dtype[r, c] != EMPTY
         ]
         labels.append(" / ".join(dict.fromkeys(parts)) if parts else f"col_{c}")
     return labels
@@ -254,6 +257,7 @@ def _find_totals_row(grid: Grid, block: Block) -> None:
 
 
 # ---------------------------------------------------------------- classify
+
 
 def _classify(grid: Grid, block: Block) -> None:
     if block.height == 1:
@@ -299,10 +303,15 @@ def _classify(grid: Grid, block: Block) -> None:
         }
         interior = grid.dtype[block.body_start : block.r1 + 1, block.c0 + 1 : block.c1 + 1]
         numeric_ratio = float((interior == NUM).sum()) / max(1, int((interior != EMPTY).sum()))
-        first_col_text = float((grid.dtype[block.body_start : block.r1 + 1,
-            block.c0] == TEXT).mean())
-        if header_types and header_types <= {DATE,
-            NUM} and numeric_ratio >= 0.75 and first_col_text >= 0.7:
+        first_col_text = float(
+            (grid.dtype[block.body_start : block.r1 + 1, block.c0] == TEXT).mean()
+        )
+        if (
+            header_types
+            and header_types <= {DATE, NUM}
+            and numeric_ratio >= 0.75
+            and first_col_text >= 0.7
+        ):
             block.kind = BlockKind.CROSSTAB
             block.confidence = 0.6 + 0.3 * numeric_ratio
             return
@@ -340,6 +349,7 @@ def _split_stacked(grid: Grid, block: Block, min_body: int = 2) -> list[Block]:
 
 
 # ---------------------------------------------------------------- context
+
 
 def _key_value_pairs(grid: Grid, block: Block) -> dict[str, object]:
     pairs: dict[str, object] = {}
@@ -381,8 +391,9 @@ def _attach_context(grid: Grid, blocks: list[Block]) -> None:
     first_table_row = min(t.r0 for t in tables)
 
     sheet_context: dict[str, object] = {}
-    for donor in sorted((d for d in donors if d.r1 < first_table_row), key=lambda d: d.r1,
-        reverse=True):
+    for donor in sorted(
+        (d for d in donors if d.r1 < first_table_row), key=lambda d: d.r1, reverse=True
+    ):
         for key, value in _donor_pairs(grid, donor).items():
             sheet_context.setdefault(key, value)
 
@@ -410,6 +421,7 @@ def _attach_context(grid: Grid, blocks: list[Block]) -> None:
 
 
 # ---------------------------------------------------------------- entry
+
 
 def segment(grid: Grid, min_row_gap: int = 1, min_col_gap: int = 1) -> list[Block]:
     if grid.n_rows == 0:
@@ -439,8 +451,12 @@ def segment(grid: Grid, min_row_gap: int = 1, min_col_gap: int = 1) -> list[Bloc
         if cols.size:
             blocks.append(
                 Block(
-                    int(row), int(row), int(cols[0]), int(cols[-1]),
-                    kind=BlockKind.BANNER, confidence=0.9,
+                    int(row),
+                    int(row),
+                    int(cols[0]),
+                    int(cols[-1]),
+                    kind=BlockKind.BANNER,
+                    confidence=0.9,
                 )
             )
 

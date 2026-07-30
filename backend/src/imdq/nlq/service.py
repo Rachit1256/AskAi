@@ -80,7 +80,7 @@ def _run(
     slots = resolve(question, lexicon, table_hint=table_hint)
     plan = build_plan(slots, row_limit=row_limit)
     table = get_table(engine, plan.measure.table_id) if plan.measure else None
-    if table is None:                                   # pragma: no cover - guarded by planner
+    if table is None:  # pragma: no cover - guarded by planner
         raise AssertionError("planner guarantees a measure")
 
     sql, params, outputs = build_sql(plan, table)

@@ -19,9 +19,7 @@ from imdq.storage.engine import SqlEngine
 router = APIRouter(prefix="/report", tags=["report"])
 
 
-def _build(
-    payload: ReportRequest, settings: Settings, engine: SqlEngine, lexicon: Lexicon
-) -> str:
+def _build(payload: ReportRequest, settings: Settings, engine: SqlEngine, lexicon: Lexicon) -> str:
     tables = list_tables(engine, table_ids=[payload.table_id] if payload.table_id else None)
     session = ReportSession(title=payload.title)
     session.datasets = [
@@ -32,7 +30,9 @@ def _build(
         try:
             session.add(
                 ask(
-                    question, engine, lexicon,
+                    question,
+                    engine,
+                    lexicon,
                     row_limit=settings.query_row_limit,
                     table_hint=payload.table_id,
                 )

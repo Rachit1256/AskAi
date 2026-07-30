@@ -159,9 +159,7 @@ def _build_recipe(grid: Grid, block: Block, index: int) -> ExtractionRecipe:
 
     for key in block.context:
         if key != "_section":
-            specs.append(
-                ColumnSpec(source_name=key, slug=slugify(key), role=ColumnRole.DIMENSION)
-            )
+            specs.append(ColumnSpec(source_name=key, slug=slugify(key), role=ColumnRole.DIMENSION))
 
     stated_totals: dict[str, float] = {}
     if block.totals_row is not None:
@@ -233,9 +231,7 @@ def analyse(path: Path, probe_rows: int = 2_000) -> FilePlan:
             remedy="Check the sheet contains a header row followed by data rows.",
         )
 
-    return FilePlan(
-        path=path, filename=path.name, content_hash=content_hash(path), sheets=sheets
-    )
+    return FilePlan(path=path, filename=path.name, content_hash=content_hash(path), sheets=sheets)
 
 
 def _locate_header(worksheet: Any, recipe: ExtractionRecipe) -> int:
@@ -306,7 +302,10 @@ def stream(
 
         if period_index:
             columns = [specs[i].slug for i in keep_index] + [
-                "period", "period_month", "value", "is_trace"
+                "period",
+                "period_month",
+                "value",
+                "is_trace",
             ]
         else:
             columns = [s.slug for s in specs] + ["is_trace"]
@@ -322,10 +321,10 @@ def stream(
         ):
             excel_row += 1
             if all(v is None or str(v).strip() == "" for v in row):
-                break                # the recipe extends until the first blank row
+                break  # the recipe extends until the first blank row
             first = row[0] if row else None
             if isinstance(first, str) and first.strip().lower().startswith("total"):
-                continue             # retained separately as a checksum
+                continue  # retained separately as a checksum
 
             coerced = _coerce_row(row, specs, recipe.context)
             if period_index:

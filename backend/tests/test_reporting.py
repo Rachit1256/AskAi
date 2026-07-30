@@ -42,9 +42,9 @@ def test_profile_reports_statistics_and_observations(warehouse):
     from imdq.storage.profile import profile_table
 
     engine, _, _ = warehouse
-    table = next(t for t in list_tables(engine) if any(
-        c["slug"] == "rainfall_mm" for c in t.columns
-    ))
+    table = next(
+        t for t in list_tables(engine) if any(c["slug"] == "rainfall_mm" for c in t.columns)
+    )
     profile = profile_table(engine, get_table(engine, table.table_id)).to_dict()
     stats = profile["statistics"]["Rainfall (mm)"]
     assert stats["count"] == 12

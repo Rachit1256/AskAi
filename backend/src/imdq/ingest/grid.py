@@ -22,7 +22,11 @@ DATE: Final[int] = 3
 BOOL: Final[int] = 4
 
 DTYPE_NAMES: Final[dict[int, str]] = {
-    EMPTY: "empty", TEXT: "text", NUM: "num", DATE: "date", BOOL: "bool"
+    EMPTY: "empty",
+    TEXT: "text",
+    NUM: "num",
+    DATE: "date",
+    BOOL: "bool",
 }
 
 _NUM_RE = re.compile(r"^[(\-+]?\s*[\u20b9$\u20ac\u00a3\u00a5]?\s*\d[\d,\s]*(\.\d+)?\s*%?\s*\)?$")

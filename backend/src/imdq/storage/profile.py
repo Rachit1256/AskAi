@@ -36,10 +36,16 @@ class MeasureStats:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "slug": self.slug, "name": self.name, "unit": self.unit,
-            "count": self.count, "missing": self.missing, "sum": self.total,
-            "average": self.mean, "median": self.median,
-            "minimum": self.minimum, "maximum": self.maximum,
+            "slug": self.slug,
+            "name": self.name,
+            "unit": self.unit,
+            "count": self.count,
+            "missing": self.missing,
+            "sum": self.total,
+            "average": self.mean,
+            "median": self.median,
+            "minimum": self.minimum,
+            "maximum": self.maximum,
             "trace_rows": self.trace_rows,
         }
 
@@ -110,11 +116,16 @@ def profile_table(engine: SqlEngine, table: TableInfo) -> TableProfile:
         count = int(row["n"] or 0)
         profile.measures.append(
             MeasureStats(
-                slug=slug, name=column["name"], unit=column["unit"],
-                count=count, missing=int((row["total_rows"] or 0) - count),
-                total=row["total"], mean=row["mean"],
+                slug=slug,
+                name=column["name"],
+                unit=column["unit"],
+                count=count,
+                missing=int((row["total_rows"] or 0) - count),
+                total=row["total"],
+                mean=row["mean"],
                 median=_median(engine, physical, slug, count),
-                minimum=row["lo"], maximum=row["hi"],
+                minimum=row["lo"],
+                maximum=row["hi"],
                 trace_rows=int(row["traces"] or 0),
             )
         )
@@ -129,7 +140,9 @@ def profile_table(engine: SqlEngine, table: TableInfo) -> TableProfile:
         distinct = engine.scalar(f'SELECT COUNT(DISTINCT "{slug}") FROM "{physical}"') or 0
         profile.dimensions.append(
             {
-                "slug": slug, "name": column["name"], "distinct": int(distinct),
+                "slug": slug,
+                "name": column["name"],
+                "distinct": int(distinct),
                 "top": [{"value": r["value"], "count": r["n"]} for r in rows],
             }
         )

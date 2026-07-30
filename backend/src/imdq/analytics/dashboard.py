@@ -35,9 +35,14 @@ class ChartSpec:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "chart_id": self.chart_id, "title": self.title, "kind": self.kind,
-            "score": round(self.score, 3), "table_id": self.table_id,
-            "caption": self.caption, "warnings": self.warnings, "vega_lite": self.spec,
+            "chart_id": self.chart_id,
+            "title": self.title,
+            "kind": self.kind,
+            "score": round(self.score, 3),
+            "table_id": self.table_id,
+            "caption": self.caption,
+            "warnings": self.warnings,
+            "vega_lite": self.spec,
         }
 
 
@@ -133,9 +138,13 @@ def build_dashboard(
                         score=score,
                         table_id=table.table_id,
                         spec=_vega(
-                            mark, rows, "category", "value",
-                            "temporal" if is_time
-                                and dimension["sql_type"] != "VARCHAR" else "nominal",
+                            mark,
+                            rows,
+                            "category",
+                            "value",
+                            "temporal"
+                            if is_time and dimension["sql_type"] != "VARCHAR"
+                            else "nominal",
                         ),
                         caption=f"{len(rows)} categories \u00b7 {table.filename} / {table.sheet}",
                     )

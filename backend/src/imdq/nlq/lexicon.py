@@ -102,9 +102,7 @@ def _terms_for_column(table: TableInfo, column: dict[str, Any]) -> str:
 def _terms_for_value(raw: str) -> str:
     normalised = normalise_station_name(str(raw))
     parts = [str(raw), normalised]
-    parts.extend(
-        old for old, new in STATION_NAME_ALIASES.items() if new == normalised
-    )
+    parts.extend(old for old, new in STATION_NAME_ALIASES.items() if new == normalised)
     return " ".join(dict.fromkeys(tokenise(" ".join(parts))))
 
 
@@ -148,32 +146,32 @@ class Lexicon:
                     :unit, :display, :column_display, :value)
             """,
             {
-                "column_slug": None, "role": None, "unit": None, "value": None,
-                "column_display": None, "dataset_id": "", **fields
+                "column_slug": None,
+                "role": None,
+                "unit": None,
+                "value": None,
+                "column_display": None,
+                "dataset_id": "",
+                **fields,
             },
         )
         self._conn.execute(
             "INSERT INTO lex_fts (terms, entry_id) VALUES (?, ?)", (terms, cursor.lastrowid)
         )
 
-    def build(self, engine: SqlEngine,
-        tables: Iterable[TableInfo] | None = None) -> int:
+    def build(self, engine: SqlEngine, tables: Iterable[TableInfo] | None = None) -> int:
         """Full rebuild. Prefer :meth:`index_dataset` after an ingest -- a full
         rebuild re-reads every distinct value of every dimension in the
         warehouse, which is wasted work when only one file changed."""
         with self._lock:
             self.clear()
-            return self._index(
-                engine, list(tables) if tables is not None else list_tables(engine)
-            )
+            return self._index(engine, list(tables) if tables is not None else list_tables(engine))
 
     def index_dataset(self, engine: SqlEngine, dataset_id: str) -> int:
         """Index just-ingested tables, leaving existing entries untouched."""
         with self._lock:
             self._remove_dataset(dataset_id)
-            return self._index(
-                engine, list_tables(engine, dataset_id=dataset_id), dataset_id
-            )
+            return self._index(engine, list_tables(engine, dataset_id=dataset_id), dataset_id)
 
     def remove_dataset(self, dataset_id: str) -> None:
         with self._lock:
@@ -194,15 +192,15 @@ class Lexicon:
         self._conn.commit()
         self._search_cache.clear()
 
-    def _index(
-        self, engine: SqlEngine, tables: list[TableInfo], dataset_id: str = ""
-    ) -> int:
+    def _index(self, engine: SqlEngine, tables: list[TableInfo], dataset_id: str = "") -> int:
         count = 0
         for table in tables:
             owner = dataset_id or table.dataset_id
             self._add(
                 " ".join(tokenise(f"{table.sheet} {table.filename} {table.kind}")),
-                kind="table", dataset_id=owner, table_id=table.table_id,
+                kind="table",
+                dataset_id=owner,
+                table_id=table.table_id,
                 physical_name=table.physical_name,
                 display=f"{table.filename} / {table.sheet}",
                 column_display=table.sheet,
@@ -213,9 +211,13 @@ class Lexicon:
                     continue
                 self._add(
                     _terms_for_column(table, column),
-                    kind=column["role"], dataset_id=owner, table_id=table.table_id,
-                    physical_name=table.physical_name, column_slug=column["slug"],
-                    role=column["role"], unit=column["unit"],
+                    kind=column["role"],
+                    dataset_id=owner,
+                    table_id=table.table_id,
+                    physical_name=table.physical_name,
+                    column_slug=column["slug"],
+                    role=column["role"],
+                    unit=column["unit"],
                     display=f"{column['name']} ({table.sheet})",
                     column_display=str(column["name"]),
                 )
@@ -230,9 +232,7 @@ class Lexicon:
         self, engine: SqlEngine, table: TableInfo, column: dict[str, Any], owner: str = ""
     ) -> int:
         slug = column["slug"]
-        cardinality = engine.scalar(
-            f'SELECT COUNT(DISTINCT "{slug}") FROM "{table.physical_name}"'
-        )
+        cardinality = engine.scalar(f'SELECT COUNT(DISTINCT "{slug}") FROM "{table.physical_name}"')
         if not cardinality or cardinality > HIGH_CARDINALITY_LIMIT:
             return 0
         _, rows = engine.fetch(
@@ -246,11 +246,16 @@ class Lexicon:
                 continue
             self._add(
                 _terms_for_value(text),
-                kind="value", dataset_id=owner, table_id=table.table_id,
+                kind="value",
+                dataset_id=owner,
+                table_id=table.table_id,
                 physical_name=table.physical_name,
-                column_slug=slug, role=column["role"], unit=column["unit"],
+                column_slug=slug,
+                role=column["role"],
+                unit=column["unit"],
                 display=f"{text} ({column['name']})",
-                column_display=str(column["name"]), value=text,
+                column_display=str(column["name"]),
+                value=text,
             )
             added += 1
         return added
@@ -314,11 +319,17 @@ class Lexicon:
         hits: list[LexHit] = []
         for row in rows:
             hit = LexHit(
-                entry_id=row["entry_id"], kind=row["kind"], table_id=row["table_id"],
-                physical_name=row["physical_name"], column_slug=row["column_slug"],
-                role=row["role"], unit=row["unit"], display=row["display"],
+                entry_id=row["entry_id"],
+                kind=row["kind"],
+                table_id=row["table_id"],
+                physical_name=row["physical_name"],
+                column_slug=row["column_slug"],
+                role=row["role"],
+                unit=row["unit"],
+                display=row["display"],
                 column_display=row["column_display"] or row["display"],
-                value=row["value"], score=-float(row["score"]),
+                value=row["value"],
+                score=-float(row["score"]),
             )
             # BM25 alone ranks a long fuzzy match above a short exact one. An
             # exact whole-token hit on the name or the value is what the user

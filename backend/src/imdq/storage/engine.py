@@ -247,9 +247,7 @@ class DuckDBEngine(SqlEngine):
 
     def table_exists(self, name: str) -> bool:
         return bool(
-            self.scalar(
-                "SELECT 1 FROM information_schema.tables WHERE table_name = ?", (name,)
-            )
+            self.scalar("SELECT 1 FROM information_schema.tables WHERE table_name = ?", (name,))
         )
 
     def close(self) -> None:
