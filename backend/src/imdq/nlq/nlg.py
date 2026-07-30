@@ -19,11 +19,7 @@ from imdq.nlq.planner import Intent, QueryPlan
 from imdq.storage.catalog import TableInfo
 
 AGGREGATION_WORDS = {
-    "sum": "Total",
-    "avg": "Average",
-    "max": "Maximum",
-    "min": "Minimum",
-    "count": "Count",
+    "sum": "Total", "avg": "Average", "max": "Maximum", "min": "Minimum", "count": "Count"
 }
 UNIT_SUFFIX = {"mm": "mm", "degC": "\u00b0C", "percent": "%", "tonnes": "t", "hPa": "hPa"}
 
@@ -100,7 +96,9 @@ def _render_table(columns: list[str], rows: list[dict[str, Any]], limit: int = 2
     }
     header = "  ".join(c.ljust(widths[c]) for c in columns)
     divider = "  ".join("-" * widths[c] for c in columns)
-    body = ["  ".join(str(row.get(c, "")).ljust(widths[c]) for c in columns) for row in shown]
+    body = [
+        "  ".join(str(row.get(c, "")).ljust(widths[c]) for c in columns) for row in shown
+    ]
     if len(rows) > limit:
         body.append(f"... {len(rows) - limit} further rows")
     return "\n".join([header, divider, *body])
@@ -152,7 +150,8 @@ def narrate(
         traces = records[0].get("trace_rows", 0) or 0
         subject = f"{word} {measure_label.lower()}" if word else measure_label
         answer.headline = (
-            f"{subject}{_filters_phrase(plan)}{_time_phrase(plan)} is {format_number(value, unit)}."
+            f"{subject}{_filters_phrase(plan)}{_time_phrase(plan)} "
+            f"is {format_number(value, unit)}."
         )
         answer.notes.append(f"Computed from {count} observation(s).")
         if traces:
@@ -201,7 +200,10 @@ def narrate(
     display_columns = [c for c in columns if c not in ("trace_rows",)]
     answer.columns = display_columns
     answer.rows = [
-        {c: format_number(r[c], unit) if c == "metric_value" else r[c] for c in display_columns}
+        {
+            c: format_number(r[c], unit) if c == "metric_value" else r[c]
+            for c in display_columns
+        }
         for r in records
     ]
     if unit == "mm":

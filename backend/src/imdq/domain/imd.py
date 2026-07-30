@@ -16,7 +16,6 @@ from typing import Final
 # Seasons -- as published on the IMD Data Service Portal cyclone series.
 # --------------------------------------------------------------------------
 
-
 @dataclass(frozen=True, slots=True)
 class Season:
     code: str
@@ -45,18 +44,8 @@ SEASONS: Final[tuple[Season, ...]] = (
 SEASON_BY_CODE: Final[dict[str, Season]] = {s.code: s for s in SEASONS}
 
 MONTH_NAMES: Final[tuple[str, ...]] = (
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
 )
 MONTH_ABBR: Final[dict[str, int]] = {
     **{name.lower(): i for i, name in enumerate(MONTH_NAMES, 1)},
@@ -171,12 +160,11 @@ def ist_from_utc(when: dt.datetime) -> dt.datetime:
 # Departure from normal
 # --------------------------------------------------------------------------
 
-
 @dataclass(frozen=True, slots=True)
 class DepartureBand:
     label: str
-    low: float  # inclusive, percent
-    high: float  # inclusive, percent
+    low: float          # inclusive, percent
+    high: float         # inclusive, percent
 
 
 #: Source: IMD standard rainfall departure categories. Confirm the cutoffs

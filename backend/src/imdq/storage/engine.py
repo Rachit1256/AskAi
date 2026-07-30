@@ -9,6 +9,7 @@ emit engine-specific syntax.
 
 from __future__ import annotations
 
+import contextlib
 import threading
 import time
 from abc import ABC, abstractmethod
@@ -193,10 +194,8 @@ def close_connection(path: Path | str) -> None:
     with _POOL_LOCK:
         connection = _DUCKDB_POOL.pop(key, None)
     if connection is not None:
-        try:
+        with contextlib.suppress(Exception):
             connection.close()
-        except Exception:
-            pass
 
 
 def close_all_duckdb() -> None:
@@ -205,10 +204,8 @@ def close_all_duckdb() -> None:
         connections = list(_DUCKDB_POOL.values())
         _DUCKDB_POOL.clear()
     for connection in connections:
-        try:
+        with contextlib.suppress(Exception):
             connection.close()
-        except Exception:
-            pass
 
 
 class DuckDBEngine(SqlEngine):
@@ -250,22 +247,20 @@ class DuckDBEngine(SqlEngine):
 
     def table_exists(self, name: str) -> bool:
         return bool(
-            self.scalar("SELECT 1 FROM information_schema.tables WHERE table_name = ?", (name,))
+            self.scalar(
+                "SELECT 1 FROM information_schema.tables WHERE table_name = ?", (name,)
+            )
         )
 
     def close(self) -> None:
         # A pooled connection outlives the request: only the cursor is closed,
         # because closing the connection would break every other request. An
         # in-memory database has no other user, so it is closed outright.
-        try:
+        with contextlib.suppress(Exception):
             self._conn.close()
-        except Exception:
-            pass
         if self._owned is not None:
-            try:
+            with contextlib.suppress(Exception):
                 self._owned.close()
-            except Exception:
-                pass
             self._owned = None
 
 

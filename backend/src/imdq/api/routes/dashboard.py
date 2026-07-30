@@ -22,7 +22,9 @@ def dashboard(
     Specifications, not images: the browser renders them, so nothing accumulates
     on disk and the charts stay interactive.
     """
-    tables = list_tables(engine, dataset_id=dataset_id, table_ids=[table_id] if table_id else None)
+    tables = list_tables(
+        engine, dataset_id=dataset_id, table_ids=[table_id] if table_id else None
+    )
     charts = build_dashboard(engine, tables, max_charts=max_charts)
     return {
         "tables": len(tables),

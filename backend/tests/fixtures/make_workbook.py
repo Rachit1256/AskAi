@@ -24,7 +24,8 @@ def build(path: Path, years: int = 30) -> Path:
     ws["A3"], ws["B3"] = "Region", "Peninsular India"
     ws["A4"], ws["B4"] = "Units", "mm"
 
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     header = ["Year", *months, "JJAS", "Annual"]
     for j, name in enumerate(header, start=1):
         cell = ws.cell(row=6, column=j, value=name)
@@ -36,8 +37,8 @@ def build(path: Path, years: int = 30) -> Path:
         ws.cell(row=7 + i, column=1, value=year)
         for j, v in enumerate(values, start=2):
             ws.cell(row=7 + i, column=j, value=v)
-        ws.cell(row=7 + i, column=14, value=round(sum(values[5:9]), 1))  # JJAS
-        ws.cell(row=7 + i, column=15, value=round(sum(values), 1))  # Annual
+        ws.cell(row=7 + i, column=14, value=round(sum(values[5:9]), 1))   # JJAS
+        ws.cell(row=7 + i, column=15, value=round(sum(values), 1))        # Annual
 
     # --- Sheet 2: station normals, context block + two stacked tables ---
     ws2 = wb.create_sheet("Station Normals")
@@ -45,12 +46,8 @@ def build(path: Path, years: int = 30) -> Path:
     ws2.merge_cells("A1:E1")
     ws2["A1"].font = BOLD
     for i, (k, v) in enumerate(
-        [
-            ("Station", "PUNE"),
-            ("Index", 43063),
-            ("Period", "1991-2020"),
-            ("Prepared", dt.date(2026, 7, 28)),
-        ],
+        [("Station", "PUNE"), ("Index", 43063), ("Period", "1991-2020"),
+         ("Prepared", dt.date(2026, 7, 28))],
         start=3,
     ):
         ws2.cell(row=i, column=1, value=k)
@@ -60,18 +57,12 @@ def build(path: Path, years: int = 30) -> Path:
         cell = ws2.cell(row=9, column=j, value=name)
         cell.font, cell.fill = BOLD, HEADER_FILL
     normals = [
-        ("January", 1.9, 0.2, 31.0),
-        ("February", 0.4, 0.1, 33.2),
-        ("March", 2.1, 0.2, 36.5),
-        ("April", 8.9, 0.7, 38.1),
-        ("May", 35.2, 2.4, 37.0),
-        ("June", 134.7, 8.9, 31.6),
-        ("July", 187.3, 14.1, 28.4),
-        ("August", 116.5, 12.7, 27.9),
-        ("September", 152.8, 8.6, 30.1),
-        ("October", 84.6, 4.2, 32.4),
-        ("November", 30.1, 1.6, 30.8),
-        ("December", 4.3, 0.4, 30.2),
+        ("January", 1.9, 0.2, 31.0), ("February", 0.4, 0.1, 33.2),
+        ("March", 2.1, 0.2, 36.5), ("April", 8.9, 0.7, 38.1),
+        ("May", 35.2, 2.4, 37.0), ("June", 134.7, 8.9, 31.6),
+        ("July", 187.3, 14.1, 28.4), ("August", 116.5, 12.7, 27.9),
+        ("September", 152.8, 8.6, 30.1), ("October", 84.6, 4.2, 32.4),
+        ("November", 30.1, 1.6, 30.8), ("December", 4.3, 0.4, 30.2),
     ]
     for i, row in enumerate(normals, start=10):
         for j, v in enumerate(row, start=1):

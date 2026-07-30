@@ -93,10 +93,7 @@ def test_one_connection_per_process_many_cursors(monkeypatch, tmp_path):
     assert connection.closed is True
 
 
-def test_relative_and_absolute_paths_share_one_connection(
-    monkeypatch,
-    tmp_path,
-):
+def test_relative_and_absolute_paths_share_one_connection(monkeypatch, tmp_path, ):
     opened: list[str] = []
 
     def connect(path):

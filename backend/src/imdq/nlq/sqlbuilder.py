@@ -46,11 +46,8 @@ def _month_text_column(table: TableInfo, columns: set[str]) -> str | None:
 
 
 def _apply_time(
-    plan: QueryPlan,
-    table: TableInfo,
-    columns: set[str],
-    where: list[str],
-    params: list[Any],
+    plan: QueryPlan, table: TableInfo, columns: set[str],
+    where: list[str], params: list[Any],
 ) -> None:
     """Apply the time filter, or refuse.
 
@@ -93,7 +90,8 @@ def _order_expression(slug: str, table: TableInfo, columns: set[str]) -> str:
     """Months stored as text sort alphabetically; a trend needs calendar order."""
     if slug == _month_text_column(table, columns):
         cases = " ".join(
-            f"WHEN LOWER(\"{slug}\") = '{name}' THEN {i}" for i, name in enumerate(MONTH_LOWER, 1)
+            f"WHEN LOWER(\"{slug}\") = '{name}' THEN {i}"
+            for i, name in enumerate(MONTH_LOWER, 1)
         )
         return f"CASE {cases} ELSE 99 END"
     return _ident(slug, columns, "column")
@@ -138,7 +136,7 @@ def build(plan: QueryPlan, table: TableInfo) -> tuple[str, list[Any], list[str]]
 
     # Missing observations must never be silently read as zero.
     if plan.measure is not None and plan.aggregation != "count":
-        where.append(f"{_ident(plan.measure.slug, columns, 'column')} IS NOT NULL")
+        where.append(f'{_ident(plan.measure.slug, columns, "column")} IS NOT NULL')
 
     sql = f"SELECT {', '.join(select)} FROM {table_sql}"
     if where:

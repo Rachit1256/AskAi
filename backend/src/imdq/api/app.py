@@ -45,9 +45,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             init_catalog(engine)
             log.info(
                 "warehouse ready",
-                extra={
-                    "extra_fields": {"engine": engine.name, "path": str(settings.warehouse_path)}
-                },
+                extra={"extra_fields": {"engine": engine.name,
+                                        "path": str(settings.warehouse_path)}},
             )
         finally:
             engine.close()

@@ -50,7 +50,10 @@ class Block:
 
     @property
     def a1(self) -> str:
-        return f"{column_letter(self.c0)}{self.r0 + 1}:{column_letter(self.c1)}{self.r1 + 1}"
+        return (
+            f"{column_letter(self.c0)}{self.r0 + 1}:"
+            f"{column_letter(self.c1)}{self.r1 + 1}"
+        )
 
     def to_dict(self) -> dict[str, object]:
         return {

@@ -52,9 +52,8 @@ def test_blocks_are_discovered_without_a_template(workbook):
 
 def test_context_block_is_lifted_onto_the_tables_below(warehouse):
     engine, _, _ = warehouse
-    normals = next(
-        t for t in list_tables(engine) if "rainfall_mm" in {c["slug"] for c in t.columns}
-    )
+    normals = next(t for t in list_tables(engine)
+        if "rainfall_mm" in {c["slug"] for c in t.columns})
     assert normals.context["station"] == "PUNE"
     assert "station" in {c["slug"] for c in normals.columns}
 

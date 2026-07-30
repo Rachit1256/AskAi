@@ -32,53 +32,18 @@ _COMPARATOR = re.compile(
     r"\b(above|over|more than|greater than|below|under|less than|at least|at most)\s+([\d.]+)"
 )
 _COMPARATOR_OPS = {
-    "above": ">",
-    "over": ">",
-    "more than": ">",
-    "greater than": ">",
-    "below": "<",
-    "under": "<",
-    "less than": "<",
-    "at least": ">=",
-    "at most": "<=",
+    "above": ">", "over": ">", "more than": ">", "greater than": ">",
+    "below": "<", "under": "<", "less than": "<",
+    "at least": ">=", "at most": "<=",
 }
 AMBIGUITY_MARGIN = 0.12
 
 #: Words that carry no referent, excluded when judging whether a match was exact.
 _STOPWORDS = frozenset(
-    {
-        "what",
-        "is",
-        "the",
-        "a",
-        "an",
-        "of",
-        "for",
-        "in",
-        "at",
-        "on",
-        "was",
-        "were",
-        "show",
-        "me",
-        "give",
-        "tell",
-        "how",
-        "much",
-        "many",
-        "and",
-        "to",
-        "by",
-        "top",
-        "bottom",
-        "first",
-        "last",
-        "please",
-        "there",
-        "value",
-        "values",
-        *(word for words in AGGREGATIONS.values() for word in words),
-    }
+    {"what", "is", "the", "a", "an", "of", "for", "in", "at", "on", "was", "were",
+     "show", "me", "give", "tell", "how", "much", "many", "and", "to", "by",
+     "top", "bottom", "first", "last", "please", "there", "value", "values",
+     *(word for words in AGGREGATIONS.values() for word in words)}
 )
 
 
@@ -92,12 +57,8 @@ class ColumnRef:
     unit: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "table": self.physical_name,
-            "column": self.slug,
-            "display": self.display,
-            "unit": self.unit,
-        }
+        return {"table": self.physical_name, "column": self.slug,
+                "display": self.display, "unit": self.unit}
 
 
 @dataclass(slots=True)
@@ -139,9 +100,8 @@ class Slots:
             "aggregation": self.aggregation,
             "measure": self.measure.to_dict() if self.measure else None,
             "group_by": [g.to_dict() for g in self.group_by],
-            "filters": [
-                {"column": f.column.slug, "op": f.op, "value": f.value} for f in self.filters
-            ],
+            "filters": [{"column": f.column.slug, "op": f.op, "value": f.value}
+                        for f in self.filters],
             "time": self.time.to_dict(),
             "limit": self.limit,
             "assumptions": list(self.assumptions),
@@ -150,12 +110,9 @@ class Slots:
 
 def _to_ref(hit: LexHit) -> ColumnRef:
     return ColumnRef(
-        table_id=hit.table_id,
-        physical_name=hit.physical_name,
-        slug=hit.column_slug or "",
-        role=hit.role or hit.kind,
-        display=hit.column_display or hit.display.split(" (")[0],
-        unit=hit.unit,
+        table_id=hit.table_id, physical_name=hit.physical_name,
+        slug=hit.column_slug or "", role=hit.role or hit.kind,
+        display=hit.column_display or hit.display.split(" (")[0], unit=hit.unit,
     )
 
 
@@ -270,6 +227,7 @@ def resolve(question: str, lexicon: Lexicon, table_hint: str | None = None) -> S
         slots.measure = _to_ref(measure_hits[0])
         slots.table_id = slots.measure.table_id
 
+
     grouping_terms = _grouping_terms(slots, group_terms, residue_wo_by)
     measure_slug = slots.measure.slug if slots.measure else None
 
@@ -287,15 +245,15 @@ def resolve(question: str, lexicon: Lexicon, table_hint: str | None = None) -> S
 
     # One query for every value named in the question, not one per token.
     value_hits = [
-        h for h in lexicon.match_values(residue_wo_by) if slots.table_id in (None, h.table_id)
+        h for h in lexicon.match_values(residue_wo_by)
+        if slots.table_id in (None, h.table_id)
     ]
     if not value_hits:
         for token in tokenise(residue_wo_by):
             if len(token) < 4 or token in AGGREGATIONS:
                 continue
             rescued = [
-                h
-                for h in _fuzzy_rescue(lexicon, token, ("value",))
+                h for h in _fuzzy_rescue(lexicon, token, ("value",))
                 if slots.table_id in (None, h.table_id)
             ]
             if rescued:
@@ -368,7 +326,6 @@ def _note_partial_match(slots: Slots, residue: str) -> None:
     # A grouping on "month" explains the word "months"; treat a trailing s as
     # the same token rather than as an unmatched concept.
     accounted |= {t + "s" for t in accounted} | {t[:-1] for t in accounted if len(t) > 3}
-
     def explained(token: str) -> bool:
         # "temp" explains "temperature"; a shared four-character stem is enough.
         return any(
@@ -385,5 +342,9 @@ def _note_partial_match(slots: Slots, residue: str) -> None:
     if not unexplained:
         return
 
-    phrase = " ".join(token for token in tokenise(residue) if token not in _STOPWORDS)
-    slots.assumptions.insert(0, f"Interpreted '{phrase}' as {slots.measure.display}.")
+    phrase = " ".join(
+        token for token in tokenise(residue) if token not in _STOPWORDS
+    )
+    slots.assumptions.insert(
+        0, f"Interpreted '{phrase}' as {slots.measure.display}."
+    )

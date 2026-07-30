@@ -91,30 +91,20 @@ def test_ambiguous_query_returns_serialisable_candidates():
 
     def hit(name, table, score):
         return LexHit(
-            entry_id=1,
-            kind="measure",
-            table_id=table,
-            physical_name=f"t_{table}",
-            column_slug="rainfall_mm",
-            role="measure",
-            unit="mm",
-            display=name,
-            column_display=name,
-            value=None,
-            score=score,
+            entry_id=1, kind="measure", table_id=table, physical_name=f"t_{table}",
+            column_slug="rainfall_mm", role="measure", unit="mm",
+            display=name, column_display=name, value=None, score=score,
         )
 
     with pytest.raises(AmbiguousQuery) as caught:
-        _check_ambiguous(
-            [hit("Rainfall A", "t1", 5.0), hit("Rainfall B", "t2", 4.95)], "measure", "rainfall"
-        )
+        _check_ambiguous([hit("Rainfall A", "t1", 5.0), hit("Rainfall B", "t2", 4.95)],
+                         "measure", "rainfall")
 
     candidates = caught.value.context["candidates"]
     assert len(candidates) == 2
     assert candidates[0]["label"] == "Rainfall A"
     import json
-
-    json.dumps(candidates)  # must survive JSON encoding for the 409 body
+    json.dumps(candidates)      # must survive JSON encoding for the 409 body
 
 
 def test_literals_are_bound_not_concatenated(warehouse):
@@ -166,15 +156,15 @@ def test_table_hint_resolves_an_ambiguous_question(warehouse):
     from imdq.storage.catalog import list_tables
 
     engine, lexicon, _ = warehouse
-    target = next(
-        t for t in list_tables(engine) if any(c["slug"] == "rainfall_mm" for c in t.columns)
-    )
+    target = next(t for t in list_tables(engine) if any(
+        c["slug"] == "rainfall_mm" for c in t.columns
+    ))
     result = ask("total rainfall", engine, lexicon, table_hint=target.table_id)
     assert result.plan.measure.table_id == target.table_id
 
 
 def test_values_named_in_the_question_resolve_in_one_pass(warehouse):
-    engine, lexicon, _ = warehouse
+    _, lexicon, _ = warehouse
     hits = lexicon.match_values("average rainy days at Pune please")
     assert hits and hits[0].value == "PUNE"
     # A value must not match on an unrelated stray token.

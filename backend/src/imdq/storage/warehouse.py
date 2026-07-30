@@ -104,11 +104,8 @@ def _create_physical_table(
     types = {spec.slug: spec.sql_type for spec in recipe.stored_columns}
     types.update(
         {
-            "period": "VARCHAR",
-            "period_month": "BIGINT",
-            "value": "DOUBLE",
-            "is_trace": "BOOLEAN",
-            "_source_row": "BIGINT",
+            "period": "VARCHAR", "period_month": "BIGINT", "value": "DOUBLE",
+            "is_trace": "BOOLEAN", "_source_row": "BIGINT",
         }
     )
     definitions = [f'"{c}" {types.get(c, "VARCHAR")}' for c in data_columns]
@@ -129,16 +126,11 @@ def physical_specs(recipe: ExtractionRecipe, data_columns: list[str]) -> list[Co
 
     synthetic = {
         "period": ColumnSpec("period", "period", ColumnRole.DIMENSION),
-        "period_month": ColumnSpec(
-            "period_month", "period_month", ColumnRole.TIME, sql_type="BIGINT"
-        ),
-        "value": ColumnSpec(
-            "value",
-            "value",
-            ColumnRole.MEASURE,
-            unit=str(melted_unit) if melted_unit else None,
-            sql_type="DOUBLE",
-        ),
+        "period_month": ColumnSpec("period_month", "period_month", ColumnRole.TIME,
+                                   sql_type="BIGINT"),
+        "value": ColumnSpec("value", "value", ColumnRole.MEASURE,
+                            unit=str(melted_unit) if melted_unit else None,
+                            sql_type="DOUBLE"),
     }
     out: list[ColumnSpec] = []
     for column in data_columns:
@@ -206,7 +198,9 @@ def ingest_file(
                 f"from the first {probe_rows} rows."
             )
         for recipe in sheet.recipes:
-            report.tables.append(_ingest_block(engine, path, dataset_id, as_of, recipe))
+            report.tables.append(
+                _ingest_block(engine, path, dataset_id, as_of, recipe)
+            )
 
     if not report.tables:
         raise IngestFailed(
@@ -232,7 +226,9 @@ def _ingest_block(
         if not data_columns:
             data_columns = list(batch.columns)
             _create_physical_table(engine, name, recipe, data_columns)
-        rows = [(*row, dataset_id, as_of.isoformat(), _row_hash(row)) for row in batch.rows]
+        rows = [
+            (*row, dataset_id, as_of.isoformat(), _row_hash(row)) for row in batch.rows
+        ]
         engine.insert_many(name, data_columns + [c for c, _ in META_COLUMNS], rows)
         written += len(batch.rows)
         for index, column in enumerate(data_columns):

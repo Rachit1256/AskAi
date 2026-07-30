@@ -132,21 +132,8 @@ def infer_unit(column_name: str) -> str | None:
 
 #: Column names that identify the *row's* time key rather than a measurement.
 TIME_KEY_NAMES = frozenset(
-    {
-        "year",
-        "date",
-        "month",
-        "day",
-        "time",
-        "period",
-        "datetime",
-        "timestamp",
-        "as_of",
-        "as_of_date",
-        "obs_date",
-        "observation_date",
-        "yr",
-    }
+    {"year", "date", "month", "day", "time", "period", "datetime", "timestamp",
+     "as_of", "as_of_date", "obs_date", "observation_date", "yr"}
 )
 
 
@@ -177,7 +164,8 @@ def classify_columns(header: list[str], sample_rows: list[tuple[Any, ...]]) -> l
         period_label = is_period_label(name)
 
         if not period_label and (
-            slug in TIME_KEY_NAMES or any(isinstance(value, (datetime, date)) for value in column)
+            slug in TIME_KEY_NAMES
+            or any(isinstance(value, (datetime, date)) for value in column)
         ):
             role = ColumnRole.TIME
         elif period_label or numeric / present >= 0.8:
@@ -189,16 +177,16 @@ def classify_columns(header: list[str], sample_rows: list[tuple[Any, ...]]) -> l
         else:
             role = ColumnRole.DIMENSION
 
-        year_like = (
-            role is ColumnRole.TIME
-            and bool(parsed)
-            and all(
-                isinstance(p.value, float) and p.value.is_integer() and 1800 <= p.value <= 2200
-                for p in parsed
-                if p.value is not None
-            )
+        year_like = role is ColumnRole.TIME and bool(parsed) and all(
+            isinstance(p.value, float) and p.value.is_integer() and 1800 <= p.value <= 2200
+            for p in parsed
+            if p.value is not None
         )
-        sql_type = "DOUBLE" if role is ColumnRole.MEASURE else "BIGINT" if year_like else "VARCHAR"
+        sql_type = (
+            "DOUBLE" if role is ColumnRole.MEASURE
+            else "BIGINT" if year_like
+            else "VARCHAR"
+        )
 
         specs.append(
             ColumnSpec(
@@ -244,11 +232,15 @@ def detect_derived_columns(
     if len(measures) < 3:
         return
 
-    named = [i for i in measures if any(token in specs[i].slug for token in DERIVED_COLUMN_TOKENS)]
+    named = [
+        i
+        for i in measures
+        if any(token in specs[i].slug for token in DERIVED_COLUMN_TOKENS)
+    ]
     if not named:
         return
 
-    sample = [row for _, row in zip(range(max_check_rows), rows)]
+    sample = [row for _, row in zip(range(max_check_rows), rows, strict=False)]
     if not sample:
         return
 
@@ -273,7 +265,9 @@ def detect_derived_columns(
             specs[candidate].derived_of = [specs[i].slug for i in parts_index]
 
 
-def _sibling_columns_for(specs: list[ColumnSpec], candidate: int, base: list[int]) -> list[int]:
+def _sibling_columns_for(
+    specs: list[ColumnSpec], candidate: int, base: list[int]
+) -> list[int]:
     """Which columns a suspected aggregate should be compared against.
 
     A seasonal code (JJAS) sums only its own months, so testing it against all
