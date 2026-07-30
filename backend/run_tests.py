@@ -86,10 +86,10 @@ def make_warehouse():
     return engine, lexicon, report
 
 
-import tests.test_ingest as t_ingest      # noqa: E402
-import tests.test_storage as t_storage    # noqa: E402
-import tests.test_query as t_query        # noqa: E402
-import tests.test_reporting as t_report   # noqa: E402
+import tests.test_ingest as t_ingest     
+import tests.test_storage as t_storage   
+import tests.test_query as t_query       
+import tests.test_reporting as t_report  
 
 passed = failed = 0
 for module in (t_ingest, t_query, t_report, t_storage):

@@ -8,10 +8,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from imdq.nlq.lexicon import Lexicon                                  # noqa: E402
-from imdq.storage.engine import close_connection, create_engine       # noqa: E402
-from imdq.storage.warehouse import ingest_file    # noqa: E402
-from tests.fixtures.make_workbook import build    # noqa: E402
+from imdq.nlq.lexicon import Lexicon                                  
+from imdq.storage.engine import close_connection, create_engine       
+from imdq.storage.warehouse import ingest_file    
+from tests.fixtures.make_workbook import build    
 
 AS_OF = dt.date(2026, 7, 28)
 

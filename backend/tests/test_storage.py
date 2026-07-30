@@ -71,7 +71,7 @@ def test_one_connection_per_process_many_cursors(monkeypatch, tmp_path):
     def worker():
         try:
             engines.append(DuckDBEngine(target))
-        except Exception as exc:      # noqa: BLE001 - recorded for the assertion
+        except Exception as exc:      
             errors.append(exc)
 
     threads = [threading.Thread(target=worker) for _ in range(20)]
@@ -192,7 +192,7 @@ def test_sqlite_engine_survives_threadpool_use(tmp_path):
     def worker(value: int):
         try:
             engine.insert_many("t", ["n"], [(value,)])
-        except Exception as exc:      # noqa: BLE001
+        except Exception as exc:     
             errors.append(exc)
 
     threads = [threading.Thread(target=worker, args=(i,)) for i in range(12)]
@@ -218,7 +218,7 @@ def test_sqlite_engine_survives_interleaved_reads_and_writes(tmp_path):
             for _ in range(20):
                 engine.insert_many("t", ["n"], [(value,)])
                 engine.fetch("SELECT COUNT(*) FROM t")
-        except Exception as exc:      # noqa: BLE001
+        except Exception as exc:     
             errors.append(exc)
 
     threads = [threading.Thread(target=worker, args=(i,)) for i in range(8)]
@@ -247,7 +247,7 @@ def test_lexicon_search_is_concurrent_safe(tmp_path):
         try:
             for _ in range(50):
                 lexicon.search("rainfall pune monsoon station", limit=5)
-        except Exception as exc:      # noqa: BLE001
+        except Exception as exc:     
             errors.append(exc)
 
     threads = [threading.Thread(target=worker, args=(i,)) for i in range(8)]

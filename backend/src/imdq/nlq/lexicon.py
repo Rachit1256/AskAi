@@ -156,7 +156,7 @@ class Lexicon:
         )
 
     def build(self, engine: SqlEngine,
-        tables: Iterable[TableInfo] | None = None) -> int:  # noqa: D401
+        tables: Iterable[TableInfo] | None = None) -> int:  
         """Full rebuild. Prefer :meth:`index_dataset` after an ingest -- a full
         rebuild re-reads every distinct value of every dimension in the
         warehouse, which is wasted work when only one file changed."""
