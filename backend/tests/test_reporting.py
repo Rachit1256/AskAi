@@ -42,9 +42,9 @@ def test_profile_reports_statistics_and_observations(warehouse):
     from imdq.storage.profile import profile_table
 
     engine, _, _ = warehouse
-    table = next(t for t in list_tables(engine) if any(
-        c["slug"] == "rainfall_mm" for c in t.columns
-    ))
+    table = next(
+        t for t in list_tables(engine) if any(c["slug"] == "rainfall_mm" for c in t.columns)
+    )
     profile = profile_table(engine, get_table(engine, table.table_id)).to_dict()
     stats = profile["statistics"]["Rainfall (mm)"]
     assert stats["count"] == 12
@@ -57,8 +57,8 @@ def test_profile_reports_statistics_and_observations(warehouse):
 def test_incremental_indexing_does_not_drop_other_datasets(warehouse, workbook, tmp_path):
     import datetime as dt
 
-    from tests.fixtures.make_workbook import build
     from imdq.storage.warehouse import ingest_file
+    from tests.fixtures.make_workbook import build
 
     engine, lexicon, _ = warehouse
     before = len(lexicon.search("rainfall", limit=50))

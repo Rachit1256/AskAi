@@ -9,7 +9,8 @@ from typing import Any
 from imdq.logging_setup import get_logger
 from imdq.nlq.lexicon import Lexicon
 from imdq.nlq.nlg import Answer, narrate
-from imdq.nlq.planner import QueryPlan, plan as build_plan
+from imdq.nlq.planner import QueryPlan
+from imdq.nlq.planner import plan as build_plan
 from imdq.nlq.resolver import Slots, resolve
 from imdq.nlq.sqlbuilder import build as build_sql
 from imdq.storage.catalog import catalog_version, get_table
@@ -79,7 +80,7 @@ def _run(
     slots = resolve(question, lexicon, table_hint=table_hint)
     plan = build_plan(slots, row_limit=row_limit)
     table = get_table(engine, plan.measure.table_id) if plan.measure else None
-    if table is None:                                   # pragma: no cover - guarded by planner
+    if table is None:  # pragma: no cover - guarded by planner
         raise AssertionError("planner guarantees a measure")
 
     sql, params, outputs = build_sql(plan, table)

@@ -9,7 +9,7 @@ number that was not computed.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from jinja2 import Environment, select_autoescape
@@ -98,7 +98,7 @@ def render_html(session: ReportSession) -> str:
     return _TEMPLATE.render(
         title=session.title,
         organisation=session.organisation,
-        generated_at=datetime.now(timezone.utc).strftime("%d %B %Y %H:%M UTC"),
+        generated_at=datetime.now(UTC).strftime("%d %B %Y %H:%M UTC"),
         normals_period=NORMALS_PERIOD,
         summary=_summary_lines(session),
         datasets=session.datasets,

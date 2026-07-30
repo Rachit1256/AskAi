@@ -19,12 +19,22 @@ def tables(
 ) -> list[TableOut]:
     return [
         TableOut(
-            table_id=t.table_id, dataset_id=t.dataset_id, filename=t.filename,
-            sheet=t.sheet, kind=t.kind, rows=t.row_count, as_of_date=t.as_of_date,
+            table_id=t.table_id,
+            dataset_id=t.dataset_id,
+            filename=t.filename,
+            sheet=t.sheet,
+            kind=t.kind,
+            rows=t.row_count,
+            as_of_date=t.as_of_date,
             context=t.context,
             columns=[
-                ColumnOut(slug=c["slug"], name=c["name"], role=c["role"],
-                          unit=c["unit"], sql_type=c["sql_type"])
+                ColumnOut(
+                    slug=c["slug"],
+                    name=c["name"],
+                    role=c["role"],
+                    unit=c["unit"],
+                    sql_type=c["sql_type"],
+                )
                 for c in t.columns
             ],
         )
@@ -70,9 +80,7 @@ def retire(
     lexicon: Lexicon = Depends(lexicon_dep),
 ) -> dict[str, str]:
     """Soft delete. History is retained so earlier reports remain reproducible."""
-    engine.execute(
-        "UPDATE cat_dataset SET status = 'retired' WHERE dataset_id = ?", (dataset_id,)
-    )
+    engine.execute("UPDATE cat_dataset SET status = 'retired' WHERE dataset_id = ?", (dataset_id,))
     lexicon.remove_dataset(dataset_id)
     service.clear_cache()
     return {"status": "retired", "dataset_id": dataset_id}

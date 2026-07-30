@@ -36,9 +36,7 @@ def ask_question(
 
 
 @router.post("/resolve")
-def resolve_only(
-    payload: AskRequest, lexicon: Lexicon = Depends(lexicon_dep)
-) -> dict[str, object]:
+def resolve_only(payload: AskRequest, lexicon: Lexicon = Depends(lexicon_dep)) -> dict[str, object]:
     """Show what a question resolves to without running it.
 
     Useful when an answer looks wrong: it separates a resolution mistake from a

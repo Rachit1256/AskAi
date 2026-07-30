@@ -12,8 +12,9 @@ from __future__ import annotations
 import threading
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from imdq.errors import QueryFailed, StorageBusy
 
@@ -249,9 +250,7 @@ class DuckDBEngine(SqlEngine):
 
     def table_exists(self, name: str) -> bool:
         return bool(
-            self.scalar(
-                "SELECT 1 FROM information_schema.tables WHERE table_name = ?", (name,)
-            )
+            self.scalar("SELECT 1 FROM information_schema.tables WHERE table_name = ?", (name,))
         )
 
     def close(self) -> None:

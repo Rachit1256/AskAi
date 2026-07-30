@@ -61,7 +61,7 @@ def plan(slots: Slots, *, row_limit: int = 5_000, time_columns: tuple[str, ...] 
         raise Unanswerable(
             "I could not match this question to a measure in the uploaded data.",
             remedy="Name the quantity you want (for example 'rainfall' or 'rainy days'), "
-                   "or upload the file that contains it.",
+            "or upload the file that contains it.",
             question=slots.question,
         )
 

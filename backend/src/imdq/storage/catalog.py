@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Any
 
 from imdq.errors import NotFound
@@ -105,7 +105,7 @@ def init_catalog(engine: SqlEngine) -> None:
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def find_dataset_by_hash(engine: SqlEngine, content_hash: str) -> dict[str, Any] | None:
@@ -124,9 +124,7 @@ def next_ingest_version(engine: SqlEngine, filename: str, as_of: str) -> int:
     return int(current or 0) + 1
 
 
-def register_dataset(
-    engine: SqlEngine, plan: FilePlan, as_of: date, ingest_version: int
-) -> str:
+def register_dataset(engine: SqlEngine, plan: FilePlan, as_of: date, ingest_version: int) -> str:
     dataset_id = uuid.uuid4().hex[:16]
     engine.execute(
         """
@@ -136,8 +134,13 @@ def register_dataset(
         VALUES (?, ?, ?, ?, ?, ?, ?, 0, 'active')
         """,
         (
-            dataset_id, plan.filename, plan.content_hash, plan.layout_fingerprint,
-            as_of.isoformat(), ingest_version, _now(),
+            dataset_id,
+            plan.filename,
+            plan.content_hash,
+            plan.layout_fingerprint,
+            as_of.isoformat(),
+            ingest_version,
+            _now(),
         ),
     )
     # A corrected re-send supersedes the earlier version for the same day.
@@ -168,23 +171,50 @@ def register_table(
         VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
         """,
         (
-            table_id, dataset_id, recipe.sheet, recipe.block_id, str(recipe.kind),
-            physical_name, cell_range, recipe.confidence,
+            table_id,
+            dataset_id,
+            recipe.sheet,
+            recipe.block_id,
+            str(recipe.kind),
+            physical_name,
+            cell_range,
+            recipe.confidence,
             json.dumps(recipe.context, default=str),
         ),
     )
     rows = [
         (
-            table_id, ordinal, spec.source_name, spec.slug, str(spec.role), spec.sql_type,
-            spec.unit, spec.period_label, spec.is_derived, json.dumps(spec.derived_of),
-            spec.null_fraction, json.dumps(spec.distinct_sample[:20], default=str),
+            table_id,
+            ordinal,
+            spec.source_name,
+            spec.slug,
+            str(spec.role),
+            spec.sql_type,
+            spec.unit,
+            spec.period_label,
+            spec.is_derived,
+            json.dumps(spec.derived_of),
+            spec.null_fraction,
+            json.dumps(spec.distinct_sample[:20], default=str),
         )
         for ordinal, spec in enumerate(specs)
     ]
     engine.insert_many(
         "cat_column",
-        ["table_id", "ordinal", "name", "slug", "role", "sql_type", "unit", "period_label",
-         "is_derived", "derived_of", "null_fraction", "distinct_sample"],
+        [
+            "table_id",
+            "ordinal",
+            "name",
+            "slug",
+            "role",
+            "sql_type",
+            "unit",
+            "period_label",
+            "is_derived",
+            "derived_of",
+            "null_fraction",
+            "distinct_sample",
+        ],
         rows,
     )
     return table_id
@@ -241,7 +271,7 @@ def list_tables(
     columns = engine.fetch_dicts(
         f"""
         SELECT * FROM cat_column
-        WHERE table_id IN ({', '.join('?' for _ in wanted)})
+        WHERE table_id IN ({", ".join("?" for _ in wanted)})
         ORDER BY table_id, ordinal
         """,
         wanted,

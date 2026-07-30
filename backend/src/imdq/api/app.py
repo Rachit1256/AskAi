@@ -22,9 +22,9 @@ from imdq.api.deps import close_lexicon
 from imdq.api.routes import catalog, dashboard, health, ingest, query, report
 from imdq.config import Settings, get_settings
 from imdq.errors import ImdqError
+from imdq.logging_setup import configure_logging, get_logger, new_request_id, request_id_var
 from imdq.storage.catalog import init_catalog
 from imdq.storage.engine import close_all_duckdb, create_engine
-from imdq.logging_setup import configure_logging, get_logger, new_request_id, request_id_var
 
 log = get_logger(__name__)
 
@@ -45,8 +45,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             init_catalog(engine)
             log.info(
                 "warehouse ready",
-                extra={"extra_fields": {"engine": engine.name,
-                                        "path": str(settings.warehouse_path)}},
+                extra={
+                    "extra_fields": {"engine": engine.name, "path": str(settings.warehouse_path)}
+                },
             )
         finally:
             engine.close()
