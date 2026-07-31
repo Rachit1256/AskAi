@@ -16,10 +16,7 @@ services:
     region: singapore        # closest Render region to India
     numInstances: 1
     healthCheckPath: /health
-    disk:
-      name: satmet-data
-      mountPath: /data
-      sizeGB: 10
+    
     envVars:
       - key: IMDQ_ENV
         value: production
