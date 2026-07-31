@@ -12,7 +12,7 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    plan: free
     region: singapore
     numInstances: 1
     healthCheckPath: /health
