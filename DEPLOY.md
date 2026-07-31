@@ -73,7 +73,7 @@ Set one environment variable by hand in the dashboard (it is marked
 `sync: false` so it is never committed):
 
 ```
-IMDQ_CORS_ORIGINS = ["https://your-frontend.vercel.app"]
+IMDQ_CORS_ORIGINS = ["https://data-retrieval-ai.vercel.app/"]
 ```
 
 A JSON array of exact origins. `["*"]` is rejected at startup by design, so a
