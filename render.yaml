@@ -12,24 +12,26 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter            # free plan has no persistent disk; this needs one
-    region: singapore        # closest Render region to India
+    plan: starter
+    region: singapore
     numInstances: 1
     healthCheckPath: /health
-    
+
     envVars:
       - key: IMDQ_ENV
         value: production
+
       - key: IMDQ_LOG_LEVEL
         value: INFO
+
       - key: IMDQ_DATA_DIR
-        value: /data
+        value: /tmp
+
       - key: IMDQ_WAREHOUSE_PATH
-        value: /data/warehouse.duckdb
+        value: /tmp/warehouse.duckdb
+
       - key: IMDQ_MAX_UPLOAD_MB
         value: "256"
-      # Must be a JSON array of exact origins. The config rejects "*" at load,
-      # so a wildcard here stops the service from starting rather than shipping
-      # an open CORS policy.
+
       - key: IMDQ_CORS_ORIGINS
         sync: false
